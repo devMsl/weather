@@ -21,8 +21,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late WeatherBloc _bloc;
-//  late AnimationController _animationController;
-
   WeatherOb? _weatherOb;
   bool? serviceEnabled;
   LocationPermission? permission;
@@ -36,12 +34,8 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = false;
 
   Future<Position?> _determinePosition() async {
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled!) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
       return Future.error('Location services are disabled.');
     }
 
@@ -64,28 +58,17 @@ class _HomePageState extends State<HomePage> {
     return null;
   }
 
-  // void checkTempUnit() {
-  //   SharedPref.getData(key: SharedPref.unit).then((rv) {
-  //     if (rv == "metric") {
-  //       setState(() {
-  //         selectedUnit = 'metric';
-  //       });
-  //     } else if (rv == "imperial") {
-  //       setState(() {
-  //         selectedUnit = 'imperial';
-  //       });
-  //     } else {
-  //       setState(() {
-  //         selectedUnit = 'metric';
-  //       });
-  //     }
-  //   });
-  // }
-
   @override
   void initState() {
-    // checkLanguage();
-    // checkTempUnit();
+    SharedPref.getData(key: SharedPref.language).then((lan) {
+      if (lan == 'en' || lan == null || lan == '') {
+        selectedLang = 1;
+      } else if (lan == 'my') {
+        selectedLang = 2;
+      } else {
+        selectedLang = 1;
+      }
+    });
     context.read<TemperatureProvider>().checkTemperatureUnit();
 
     _determinePosition().then((value) {
@@ -98,13 +81,12 @@ class _HomePageState extends State<HomePage> {
         if (event.responseState == ResponseState.data) {
           _weatherOb = event.data;
           temperature = _weatherOb!.current!.temp ?? '';
-          if (int.parse(_weatherOb!.current!.dt!) == int.parse(_weatherOb!.current!.sunrise!) &&
-              (int.parse(_weatherOb!.current!.dt!) > int.parse(_weatherOb!.current!.sunrise!) && int.parse(_weatherOb!.current!.dt!) < int.parse(_weatherOb!.current!.sunset!))) {
-            // isSunrise = true;
+          if (int.parse(_weatherOb!.current!.dt!) == int.parse(_weatherOb!.current!.sunrise!) ||
+              ((int.parse(_weatherOb!.current!.dt!) > int.parse(_weatherOb!.current!.sunrise!) && int.parse(_weatherOb!.current!.dt!) < int.parse(_weatherOb!.current!.sunset!)))) {
             context.read<SunriseProvider>().checkSunrise(true);
-          } else
+          } else {
             context.read<SunriseProvider>().checkSunrise(false);
-          // isSunrise = false;
+          }
 
           setState(() {});
           timeZone = _weatherOb!.timezone!.split('/');
@@ -113,148 +95,11 @@ class _HomePageState extends State<HomePage> {
       });
     });
     super.initState();
-
-//    List grid = [
-//      [".", ".", ".", "1", "4", ".", ".", "2", "."],
-//      [".", ".", "6", ".", ".", ".", ".", ".", "."],
-//      [".", ".", ".", ".", ".", ".", ".", ".", "."],
-//      [".", ".", "1", ".", ".", ".", ".", ".", "."],
-//      [".", "6", "7", ".", ".", ".", ".", ".", "9"],
-//      [".", ".", ".", ".", ".", ".", "8", "1", "."],
-//      [".", "3", ".", ".", ".", ".", ".", ".", "6"],
-//      [".", ".", ".", ".", ".", "7", ".", ".", "."],
-//      [".", ".", ".", "5", ".", ".", ".", "7", "."]
-//    ];
-//    print(grid.length);
-//    print(grid[0].length);
-//    outerloop:
-//    for (int row = 0; row < 9; row++) {
-//      for (int col = 0; col < 9; col++) {
-//        if (col == grid.length - 1) {
-//        } else {
-//          if (grid[row][col] == grid[row][col + 1]) {
-//            print('false');
-//            break outerloop;
-//          } else {
-//            print('true');
-//          }
-//        }
-//      }
-//    }
-
-//    print(solve());
   }
 
-//  List grid = [
-//    [".", ".", ".", "1", "4", ".", ".", "2", "."],
-//    [".", ".", "6", ".", ".", ".", ".", ".", "."],
-//    [".", ".", ".", ".", ".", ".", ".", ".", "."],
-//    [".", ".", "1", ".", ".", ".", ".", ".", "."],
-//    [".", "6", "7", ".", ".", ".", ".", ".", "9"],
-//    [".", ".", ".", ".", ".", ".", "8", "1", "."],
-//    [".", "3", ".", ".", ".", ".", ".", ".", "6"],
-//    [".", ".", ".", ".", ".", "7", ".", ".", "."],
-//    [".", ".", ".", "5", ".", ".", ".", "7", "."]
-//  ];
-//  // we check if a possible number is already in a row
-//  bool isInRow(int row, String number) {
-//    for (int i = 0; i < 9; i++) if (grid[row][i] == number) return true;
-//
-//    return false;
-//  }
-//
-//  // we check if a possible number is already in a column
-//  bool isInCol(int col, String number) {
-//    for (int i = 0; i < 9; i++) if (grid[i][col] == number) return true;
-//
-//    return false;
-//  }
-//
-//  // we check if a possible number is in its 3x3 box
-//  bool isInBox(int row, int col, String number) {
-//    int r = row - row % 3;
-//    int c = col - col % 3;
-//
-//    for (int i = r; i < r + 3; i++) for (int j = c; j < c + 3; j++) if (grid[i][j] == number) return true;
-//
-//    return false;
-//  }
-//
-//  // combined method to check if a number possible to a row,col position is ok
-//  bool isOk(int row, int col, String number) {
-//    return !isInRow(row, number) && !isInCol(col, number) && !isInBox(row, col, number);
-//  }
-//
-//  bool solve() {
-//    for (int row = 0; row < 9; row++) {
-//      for (int col = 0; col < 9; col++) {
-//        // we search an empty cell
-//        if (grid[row][col] == '') {
-//          // we try possible numbers
-//          for (int number = 1; number <= 9; number++) {
-//            if (isOk(row, col, number.toString())) {
-//              // number ok. it respects sudoku constraints
-//              grid[row][col] = number.toString();
-//
-//              if (solve()) {
-//                // we start backtracking recursively
-//                return true;
-//              } else {
-//                // if not a solution, we empty the cell and we continue
-//                grid[row][col] = '';
-//              }
-//            }
-//          }
-//
-//          return false; // we return false
-//        }
-//      }
-//    }
-//    return true; // sudoku solved
-//  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(
-      //     'weather',
-      //     style: Theme.of(context).textTheme.headline1,
-      //   ).tr(),
-      //   centerTitle: false,
-      //   actions: [
-      //     IconButton(
-      //         onPressed: () {
-      //           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      //             return SearchByCityPage();
-      //           }));
-      //         },
-      //         icon: Icon(CupertinoIcons.search)),
-      //     IconButton(
-      //         onPressed: () {
-      //           Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      //             return SettingPage();
-      //           })).then((value) {
-      //             if (value != null) {
-      //               if (value) {
-      //                 print('back unit ${context.read<TemperatureProvider>().unit}');
-      //                 _bloc = WeatherBloc(
-      //                     'lat=${position!.latitude.toString()}&lon=${position!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
-      //                 _bloc.getWeatherData();
-      //                 _bloc.getWeatherStream().listen((event) {
-      //                   if (event.responseState == ResponseState.loading) {}
-      //                   if (event.responseState == ResponseState.data) {
-      //                     _weatherOb = event.data;
-      //                     print('${_weatherOb!.timezone.toString()}');
-      //                     setState(() {});
-      //                   }
-      //                 });
-      //               }
-      //             }
-      //           });
-      //         },
-      //         icon: Icon(CupertinoIcons.ellipsis_vertical))
-      //   ],
-      // ),
       body: _weatherOb == null || isLoading == true
           ? LoadingWidget()
           : Container(
@@ -279,48 +124,18 @@ class _HomePageState extends State<HomePage> {
                                 return SearchByCityPage();
                               }));
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               CupertinoIcons.search,
                               color: Colors.white,
                             )),
-                        // IconButton(
-                        //     onPressed: () {
-                        //       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                        //         return SettingPage();
-                        //       })).then((value) {
-                        //         if (value != null) {
-                        //           if (value) {
-                        //             print('back unit ${context.read<TemperatureProvider>().unit}');
-                        //             _bloc = WeatherBloc(
-                        //                 'lat=${position!.latitude.toString()}&lon=${position!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
-                        //             _bloc.getWeatherData();
-                        //             _bloc.getWeatherStream().listen((event) {
-                        //               if (event.responseState == ResponseState.loading) {}
-                        //               if (event.responseState == ResponseState.data) {
-                        //                 _weatherOb = event.data;
-                        //                 print('${_weatherOb!.timezone.toString()}');
-                        //                 setState(() {});
-                        //               }
-                        //             });
-                        //           }
-                        //         }
-                        //       });
-                        //     },
-                        //     icon: Icon(
-                        //       CupertinoIcons.ellipsis_vertical,
-                        //       color: Colors.white,
-                        //     )),
                       ],
                     ),
                   ),
                   InkWell(
                     onTap: () {
-//                    print(position!.latitude.toString());
-//                    print(position!.longitude.toString());
-
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                         return WeatherDetailPage(
-                          position!.latitude.toString(), //position!.latitude.toString(),
+                          position!.latitude.toString(),
                           position!.longitude.toString(),
                         );
                       }));
@@ -337,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                               children: [
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       CupertinoIcons.compass,
                                       color: Colors.blueGrey,
                                     ),
@@ -347,14 +162,14 @@ class _HomePageState extends State<HomePage> {
                                     )
                                   ],
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 10,
                                 ),
                                 Text(
                                   '${city ?? ''}',
                                   style: Theme.of(context).textTheme.headline4,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 15,
                                 ),
                                 Text(
@@ -374,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Row(

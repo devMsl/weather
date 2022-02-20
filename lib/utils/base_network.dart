@@ -1,20 +1,20 @@
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart' show Client;
 import 'package:weather/model/respone_ob.dart';
 import 'package:weather/utils/app_constants.dart';
 
 class BaseNetwork {
+  Client client = Client();
   Future<ResponseOb> getRequest({required String url}) async {
     ResponseOb rv = ResponseOb();
-    return await http.get(Uri.parse(BASE_URL + url)).then((res) {
-      print(res.statusCode);
+    return await client.get(Uri.parse(BASE_URL + url)).then((res) {
       if (res.statusCode == 200) {
         rv.responseState = ResponseState.data;
         rv.data = res.body;
       } else if (res.statusCode == 404) {
         rv.responseState = ResponseState.noData;
-        rv.data = res.body; //'City not found!';
+        rv.data = res.body;
       } else if (res.statusCode == 429) {
         rv.responseState = ResponseState.error;
         rv.data = 'Too many requests!';

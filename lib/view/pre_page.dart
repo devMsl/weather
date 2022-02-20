@@ -35,10 +35,13 @@ class _MyAppState extends State<MyApp> {
     SharedPref.getData(key: SharedPref.language).then((lan) {
       if (lan == 'en' || lan == null || lan == '') {
         fontFamily = "Pyidaungsu";
+        context.setLocale(Locale('en'));
       } else if (lan == 'my') {
         fontFamily = "Pyidaungsu";
+        context.setLocale(Locale('my'));
       } else {
         fontFamily = "Pyidaungsu";
+        context.setLocale(Locale('en'));
       }
     });
   }

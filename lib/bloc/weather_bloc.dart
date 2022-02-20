@@ -17,20 +17,10 @@ class WeatherBloc extends BaseNetwork {
     getRequest(url: endUrl ?? '').then((rv) {
       Map<String, dynamic> map = json.decode(rv.data);
       if (rv.responseState == ResponseState.data) {
-//        if (map != null) {
-        //        T ob = T.fromJson(map);
         WeatherOb ob = WeatherOb.fromJson(map);
         resp.responseState = ResponseState.data;
         resp.data = ob;
         controller.sink.add(resp);
-//        }
-
-//        if (rv.data is WeatherOb) {
-//          print('weatherob');
-//        }
-//        if (rv.data is WeatherDetailOb) {
-//          print('weather deatil ob');
-//        }
       } else {
         resp.responseState = ResponseState.error;
         resp.data = rv.data;

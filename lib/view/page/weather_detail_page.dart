@@ -23,7 +23,6 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
   late WeatherDetailBloc _bloc;
   WeatherDetailOb? _weatherDetailOb;
   List<String>? timeZone;
-//  List<String>? timeZoneCopy;
 
   String? city;
   bool isLoading = false;
@@ -43,7 +42,6 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
         timeZone = _weatherDetailOb!.timezone!.split('/');
         city = timeZone![1].replaceAll('_', ' ');
         setState(() {});
-//        timeZoneCopy = List.from(timeZone!);
       }
     });
     super.initState();
@@ -79,23 +77,6 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                       floating: false,
                       elevation: 0,
                       pinned: true,
-//            stretch: false,
-//            snap: true,
-//            title: Text('kk'),
-//            title: Column(
-//              mainAxisAlignment: MainAxisAlignment.end,
-//              children: [
-//                Text(
-//                  city!,
-//                  style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 20, fontWeight: FontWeight.normal),
-//                ),
-//                Text(
-//                  timeZone![0],
-//                  style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 14, fontWeight: FontWeight.normal),
-//                  textAlign: TextAlign.center,
-//                ),
-//              ],
-//            ),
                       flexibleSpace: LayoutBuilder(
                         builder: (BuildContext context, BoxConstraints constraints) {
                           top = constraints.biggest.height;
@@ -105,7 +86,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                             ),
                             stretchModes: [StretchMode.zoomBackground],
                             title: _weatherDetailOb == null
-                                ? Text(
+                                ? const Text(
                                     'loading',
                                     style: TextStyle(color: Colors.black),
                                   )
@@ -122,7 +103,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                                               '${_weatherDetailOb!.current!.weather![0].description}',
                                               style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 10, fontWeight: FontWeight.normal),
                                             ),
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 5,
                                       ),
                                       _weatherDetailOb!.current!.temp == 'null'
@@ -311,8 +292,8 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                       ),
                     ),
                   ),
-                  SliverPadding(
-                    padding: const EdgeInsets.all(10.0),
+                  const SliverPadding(
+                    padding: EdgeInsets.all(10.0),
                   )
                 ],
               ),
@@ -324,7 +305,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
+        const SizedBox(
           height: 5,
         ),
         Text(
@@ -335,7 +316,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
           value,
           style: Theme.of(context).textTheme.headline4!.copyWith(fontSize: 18, fontWeight: FontWeight.normal),
         ),
-        SizedBox(
+        const SizedBox(
           height: 5,
         )
       ],

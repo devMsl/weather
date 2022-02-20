@@ -18,7 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.14.0 <3.0.0"
+  sdk: ">=2.15.0 <3.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -27,13 +27,13 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  provider: ^5.0.0
-  shared_preferences: ^2.0.6
-  geolocator: ^7.1.0
-  http: ^0.13.3
+  provider: ^6.0.2
+  shared_preferences: ^2.0.12
+  geolocator: ^8.0.3
+  http: ^0.13.4
   pull_to_refresh: ^2.0.0
-  cached_network_image: ^3.0.0
-  rxdart: ^0.27.1
+  cached_network_image: ^3.2.0
+  rxdart: ^0.27.3
   easy_localization: ^3.0.0
 
   flutter:
@@ -47,6 +47,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  test: ^1.19.5
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

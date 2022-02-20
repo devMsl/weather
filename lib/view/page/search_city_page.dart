@@ -46,7 +46,6 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
     });
     _bloc.getCityWeatherData();
     _bloc.getCityWeatherStream().listen((event) {
-      print(event.responseState);
       if (event.responseState == ResponseState.noData) {
         setState(() {
           message = event.data['message'];
@@ -59,10 +58,6 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
         _weatherDetailBloc = WeatherDetailBloc('onecall?lat=${lat ?? ''}&lon=${lon ?? ''}&exclude=minutely&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
         _weatherDetailBloc.getWeatherDetailData();
         _weatherDetailBloc.getWeatherStream().listen((event) {
-//          if (event.responseState == ResponseState.loading) {
-//            isLoading = true;
-//            setState(() {});
-//          }
           if (event.responseState == ResponseState.data) {
             _weatherDetailOb = event.data;
             isLoading = false;
@@ -82,12 +77,6 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      appBar: PreferredSize(
-//        preferredSize: Size(0, 0),
-//        child: Container(
-////          color: Colors.black45,
-//            ),
-//      ),
       body: Container(
         decoration: BoxDecoration(
             image: DecorationImage(image: context.read<SunriseProvider>().isSunrise ? AssetImage('assets/sunrise.jpeg') : AssetImage('assets/sunset.jpeg'), fit: BoxFit.fill)),
@@ -96,7 +85,6 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
           slivers: [
             SliverAppBar(
                 backgroundColor: Colors.transparent,
-                // systemOverlayStyle: context.read<ThemeProvider>().themeMode == ThemeMode.light ? SystemUiOverlayStyle.dark : SystemUiOverlayStyle.light,
                 leading: IconButton(
                   icon: Icon(
                     Icons.arrow_back_sharp,
@@ -111,10 +99,8 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                 floating: true,
                 elevation: 0,
                 pinned: false,
-//              stretch: false,
                 snap: false,
                 title: Container(
-//                margin: EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(color: Colors.grey.withOpacity(.2), borderRadius: BorderRadius.circular(20)),
                   child: TextFormField(
                     style: Theme.of(context).textTheme.bodyText1,
@@ -147,11 +133,6 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                       : Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-//                          IconButton(
-//                              onPressed: () {
-//                                context.read<TemperatureProvider>().saveCityCord({'lat': lat, 'lon': lon});
-//                              },
-//                              icon: Icon(CupertinoIcons.plus)),
                             Text(
                               city == null ? '' : city!,
                               style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 14, fontWeight: FontWeight.normal),
@@ -162,7 +143,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                                     '${_weatherDetailOb!.current!.weather![0].description}',
                                     style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 10, fontWeight: FontWeight.normal),
                                   ),
-                            SizedBox(
+                            const SizedBox(
                               height: 5,
                             ),
                             _weatherDetailOb!.current!.temp == 'null'
@@ -171,26 +152,8 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                                     '${_weatherDetailOb!.current!.temp} ${context.watch<TemperatureProvider>().unit == 'metric' ? '\u2103' : '\u2109'}',
                                     style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 23, fontWeight: FontWeight.normal),
                                   ),
-//                        SizedBox(
-//                          height: 10,
-//                        ),
-
-//                        Text(
-//                          timeZone![0],
-//                          style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 14, fontWeight: FontWeight.normal),
-//                          textAlign: TextAlign.center,
-//                        ),
                           ],
                         ),
-//              background: CachedNetworkImage(
-//                fit: BoxFit.cover,
-//                imageUrl:
-//                    'https://images.unsplash.com/photo-1473186578172-c141e6798cf4?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=1566&q=80',
-//                placeholder: (context, url) => Container(
-//                  color: Colors.grey,
-//                ),
-//                errorWidget: (context, url, err) => Icon(Icons.error),
-//              ),
                 )),
             isLoading
                 ? SliverToBoxAdapter(
@@ -200,8 +163,8 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                     child: Container(),
                   ),
             isLoading || _weatherDetailOb == null
-                ? SliverPadding(
-                    padding: const EdgeInsets.all(10.0),
+                ? const SliverPadding(
+                    padding: EdgeInsets.all(10.0),
                   )
                 : SliverToBoxAdapter(
                     child: _weatherDetailOb!.hourly == null || _weatherDetailOb!.hourly!.length == 0
@@ -253,8 +216,8 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                           ),
                   ),
             isLoading || _weatherDetailOb == null
-                ? SliverPadding(
-                    padding: const EdgeInsets.all(10.0),
+                ? const SliverPadding(
+                    padding: EdgeInsets.all(10.0),
                   )
                 : SliverToBoxAdapter(
                     child: _weatherDetailOb!.daily == null || _weatherDetailOb!.daily!.length == 0
@@ -334,8 +297,8 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                           ),
                   ),
             isLoading || _weatherDetailOb == null
-                ? SliverPadding(
-                    padding: const EdgeInsets.all(10.0),
+                ? const SliverPadding(
+                    padding: EdgeInsets.all(10.0),
                   )
                 : SliverToBoxAdapter(
                     child: Container(
@@ -386,8 +349,8 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                       ),
                     ),
                   ),
-            SliverPadding(
-              padding: const EdgeInsets.all(10.0),
+            const SliverPadding(
+              padding: EdgeInsets.all(10.0),
             )
           ],
         ),
@@ -399,7 +362,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
+        const SizedBox(
           height: 5,
         ),
         Text(
@@ -410,7 +373,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
           value,
           style: Theme.of(context).textTheme.headline4!.copyWith(fontSize: 18, fontWeight: FontWeight.normal),
         ),
-        SizedBox(
+        const SizedBox(
           height: 5,
         )
       ],

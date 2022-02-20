@@ -23,7 +23,7 @@ class SearchCityWeatherBloc extends BaseNetwork {
         controller.sink.add(responseOb);
       } else if (value.responseState == ResponseState.noData) {
         responseOb.responseState = ResponseState.noData;
-        responseOb.data = map; //{"cod":"400","message":"Nothing to geocode"}
+        responseOb.data = map;
         controller.sink.add(responseOb);
       } else {
         responseOb.responseState = ResponseState.error;

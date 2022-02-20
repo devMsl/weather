@@ -15,7 +15,7 @@ class LoadingWidget extends StatelessWidget {
               width: 50,
               height: 50,
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
             LinearProgressIndicator(
