@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class BuildThemeData {
   ThemeData lightTheme(String str, Locale locale) {
     return ThemeData(
-      useMaterial3: true,
+      appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.white, // <-- SEE HERE
+          statusBarIconBrightness: Brightness.dark, //<-- For Android SEE HERE (dark icons)
+          statusBarBrightness: Brightness.dark, //<-- For iOS SEE HERE (dark icons)
+        ),
+      ),
+      // useMaterial3: true,
       textTheme: TextTheme(
         caption: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w600, fontFamily: str, locale: locale),
         headline1: TextStyle(fontSize: 17, color: Colors.white, fontWeight: FontWeight.w600, fontFamily: str, locale: locale),

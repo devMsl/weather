@@ -104,20 +104,22 @@ class _HomePageState extends State<HomePage> {
           ? LoadingWidget()
           : Container(
               decoration: BoxDecoration(
-                  image:
-                      DecorationImage(image: context.read<SunriseProvider>().isSunrise ? AssetImage('assets/sunrise.jpeg') : AssetImage('assets/sunset.jpeg'), fit: BoxFit.fill)),
+                  image: DecorationImage(
+                      image: context.read<SunriseProvider>().isSunrise ? const AssetImage('assets/sunrise.jpeg') : const AssetImage('assets/sunset.jpeg'), fit: BoxFit.fill)),
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
                 children: [
                   Container(
-                    margin: EdgeInsets.fromLTRB(10, 40, 5, 20),
+                    margin: const EdgeInsets.fromLTRB(10, 40, 5, 20),
                     child: Row(
                       children: [
-                        Text(
-                          'weather',
-                          style: Theme.of(context).textTheme.headline1,
-                        ).tr(),
-                        Spacer(),
+                        Expanded(
+                          child: Text(
+                            'weather',
+                            style: Theme.of(context).textTheme.headline1,
+                          ).tr(),
+                        ),
+                        // const Spacer(),
                         IconButton(
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(builder: (context) {

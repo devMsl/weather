@@ -6,12 +6,6 @@ class TemperatureProvider extends ChangeNotifier {
   String unit = 'metric';
   List<Map<String, dynamic>> cordList = [];
 
-  saveCityCord(Map<String, dynamic> myMap) {
-    cordList.add(myMap);
-    print('cordList $cordList');
-    notifyListeners();
-  }
-
   checkTemperatureUnit() {
     SharedPref.getData(key: SharedPref.unit).then((value) {
       if (value != null || value != 'null') {
