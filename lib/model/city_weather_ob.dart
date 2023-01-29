@@ -112,7 +112,7 @@ class Weather {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['main'] = main;
     data['description'] = description;
@@ -145,7 +145,7 @@ class Main {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['temp'] = temp;
     data['feels_like'] = feelsLike;
     data['temp_min'] = tempMin;
@@ -172,7 +172,7 @@ class Wind {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['speed'] = speed;
     data['deg'] = deg;
     data['gust'] = gust;
@@ -192,7 +192,7 @@ class Rain {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['1h'] = d1h;
     data['3h'] = d3h;
     return data;
@@ -211,7 +211,7 @@ class Snow {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['1h'] = d1h;
     data['3h'] = d3h;
     return data;
@@ -228,7 +228,7 @@ class Clouds {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['all'] = all;
     return data;
   }
@@ -254,7 +254,7 @@ class Sys {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['type'] = type;
     data['id'] = id;
     data['country'] = country;

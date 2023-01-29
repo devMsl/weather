@@ -1,18 +1,19 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/bloc/weather_bloc.dart';
-import 'package:weather/model/respone_ob.dart';
 import 'package:weather/model/weather_ob.dart';
 import 'package:weather/provider/sunrise_provider.dart';
 import 'package:weather/provider/temperature_provider.dart';
-import 'package:weather/utils/app_constants.dart';
 import 'package:weather/utils/shared_pref.dart';
 import 'package:weather/view/page/search_city_page.dart';
 import 'package:weather/view/page/weather_detail_page.dart';
 import 'package:weather/view/widgets/loading_widget.dart';
+
+import '../../model/response_ob.dart';
+import '../../utils/app_constants.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -20,40 +21,48 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late WeatherBloc _bloc;
-  WeatherOb? _weatherOb;
-  bool? serviceEnabled;
-  LocationPermission? permission;
-  Position? position;
-  List<String>? timeZone;
-  String? city;
+  Location location = Location();
+
+  bool _serviceEnabled = false;
   bool isSunrise = true;
-  int selectedUnit = 1;
-  int selectedLang = 1;
-  String? temperature;
+  bool? serviceEnabled;
   bool isLoading = false;
 
-  Future<Position?> _determinePosition() async {
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled!) {
-      return Future.error('Location services are disabled.');
-    }
+  PermissionStatus? _permissionGranted;
+  LocationData? _locationData;
+  WeatherOb? _weatherOb;
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+  late WeatherBloc _bloc;
+  List<String>? timeZone;
+
+  String? city;
+  String? temperature;
+
+  int selectedUnit = 1;
+  int selectedLang = 1;
+
+  Future<LocationData?> _determinePosition() async {
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return null;
       }
     }
 
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
-    }
-    if (permission == LocationPermission.whileInUse) {
-      return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high).catchError((e) {
-        print(e);
-      });
+    _permissionGranted = await location.hasPermission();
+
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        _locationData = await location.getLocation();
+
+        return _locationData;
+      }
+    } else if (_permissionGranted == PermissionStatus.granted) {
+      _locationData = await location.getLocation();
+
+      return _locationData;
     }
     return null;
   }
@@ -70,11 +79,8 @@ class _HomePageState extends State<HomePage> {
       }
     });
     context.read<TemperatureProvider>().checkTemperatureUnit();
-
     _determinePosition().then((value) {
-      position = value;
-      _bloc = WeatherBloc(
-          'onecall?lat=${position!.latitude.toString()}&lon=${position!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
+      _bloc = WeatherBloc('onecall?lat=${value!.latitude}&lon=${value.longitude}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$appId');
       _bloc.getWeatherData();
       _bloc.getWeatherStream().listen((event) {
         if (event.responseState == ResponseState.loading) {}
@@ -105,7 +111,7 @@ class _HomePageState extends State<HomePage> {
           : Container(
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: context.read<SunriseProvider>().isSunrise ? const AssetImage('assets/sunrise.jpeg') : const AssetImage('assets/sunset.jpeg'), fit: BoxFit.fill)),
+                      image: context.read<SunriseProvider>().isSunrise ? const AssetImage('assets/sunrise.JPG') : const AssetImage('assets/sunset.JPG'), fit: BoxFit.fill)),
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
                 children: [
@@ -116,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: Text(
                             'weather',
-                            style: Theme.of(context).textTheme.headline1,
+                            style: Theme.of(context).textTheme.headline2,
                           ).tr(),
                         ),
                         // const Spacer(),
@@ -137,8 +143,8 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                         return WeatherDetailPage(
-                          position!.latitude.toString(),
-                          position!.longitude.toString(),
+                          _locationData!.latitude.toString(),
+                          _locationData!.longitude.toString(),
                         );
                       }));
                     },
@@ -168,7 +174,7 @@ class _HomePageState extends State<HomePage> {
                                   height: 10,
                                 ),
                                 Text(
-                                  '${city ?? ''}',
+                                  city ?? '',
                                   style: Theme.of(context).textTheme.headline4,
                                 ),
                                 const SizedBox(
@@ -206,7 +212,7 @@ class _HomePageState extends State<HomePage> {
                                 setState(() {
                                   selectedLang = 1;
                                   SharedPref.setData(key: SharedPref.language, value: 'en');
-                                  context.setLocale(Locale('en'));
+                                  context.setLocale(const Locale('en'));
                                 });
                               },
                               child: Text(
@@ -223,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                                 setState(() {
                                   selectedLang = 2;
                                   SharedPref.setData(key: SharedPref.language, value: 'my');
-                                  context.setLocale(Locale('my'));
+                                  context.setLocale(const Locale('my'));
                                 });
                               },
                               child: Text(
@@ -245,7 +251,7 @@ class _HomePageState extends State<HomePage> {
                                   SharedPref.setData(key: SharedPref.unit, value: 'metric');
                                   context.read<TemperatureProvider>().changeToCelsius();
                                   _bloc = WeatherBloc(
-                                      'onecall?lat=${position!.latitude.toString()}&lon=${position!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
+                                      'onecall?lat=${_locationData!.latitude.toString()}&lon=${_locationData!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$appId');
                                   _bloc.getWeatherData();
                                   _bloc.getWeatherStream().listen((event) {
                                     if (event.responseState == ResponseState.data) {
@@ -280,7 +286,7 @@ class _HomePageState extends State<HomePage> {
                                   SharedPref.setData(key: SharedPref.unit, value: 'imperial');
                                   context.read<TemperatureProvider>().changeToFahrenheit();
                                   _bloc = WeatherBloc(
-                                      'onecall?lat=${position!.latitude.toString()}&lon=${position!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
+                                      'onecall?lat=${_locationData!.latitude.toString()}&lon=${_locationData!.longitude.toString()}&exclude=minutely,hourly,daily&units=${context.read<TemperatureProvider>().unit}&appid=$appId');
                                   _bloc.getWeatherData();
                                   _bloc.getWeatherStream().listen((event) {
                                     if (event.responseState == ResponseState.data) {
@@ -318,7 +324,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _bloc.dispose();
-    // TODO: implement dispose
     super.dispose();
   }
 }

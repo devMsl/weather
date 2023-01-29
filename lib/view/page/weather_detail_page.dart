@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather/bloc/weather_detail_bloc.dart';
-import 'package:weather/model/respone_ob.dart';
+import 'package:weather/model/response_ob.dart';
 import 'package:weather/model/weather_detail_ob.dart';
 import 'package:weather/provider/sunrise_provider.dart';
 import 'package:weather/provider/temperature_provider.dart';
@@ -29,7 +28,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
 
   @override
   void initState() {
-    _bloc = WeatherDetailBloc('onecall?lat=${widget.lat}&lon=${widget.lon}&exclude=minutely&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
+    _bloc = WeatherDetailBloc('onecall?lat=${widget.lat}&lon=${widget.lon}&exclude=minutely&units=${context.read<TemperatureProvider>().unit}&appid=$appId');
     _bloc.getWeatherDetailData();
     _bloc.getWeatherStream().listen((event) {
       if (event.responseState == ResponseState.loading) {
@@ -54,57 +53,34 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
     return Scaffold(
       body: isLoading || _weatherDetailOb == null
           ? LoadingWidget()
-          : Container(
-              decoration: BoxDecoration(
-                  image:
-                      DecorationImage(image: context.read<SunriseProvider>().isSunrise ? AssetImage('assets/sunrise.jpeg') : AssetImage('assets/sunset.jpeg'), fit: BoxFit.fill)),
-              child: CustomScrollView(
-                physics: BouncingScrollPhysics(),
-                slivers: [
-                  SliverAppBar(
-                      backgroundColor: Colors.transparent,
-                      leading: IconButton(
-                        icon: Icon(
-                          Icons.arrow_back_sharp,
-                          color: Theme.of(context).textTheme.headline3!.color,
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      automaticallyImplyLeading: false,
-                      expandedHeight: 210.0,
-                      floating: false,
-                      elevation: 0,
-                      pinned: true,
-                      flexibleSpace: LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
-                          top = constraints.biggest.height;
-                          return FlexibleSpaceBar(
-                            background: Container(
-                              color: Colors.black54, //Theme.of(context).cardColor,
-                            ),
-                            stretchModes: [StretchMode.zoomBackground],
-                            title: _weatherDetailOb == null
-                                ? const Text(
-                                    'loading',
-                                    style: TextStyle(color: Colors.black),
-                                  )
-                                : Column(
-                                    mainAxisSize: MainAxisSize.min,
+          : SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(10, 40, 5, 20),
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: context.read<SunriseProvider>().isSunrise ? const AssetImage('assets/sunrise.JPG') : const AssetImage('assets/sunset.JPG'), fit: BoxFit.fill)),
+                child: Column(
+                  children: [
+                    _weatherDetailOb == null
+                        ? const Text(
+                            'loading',
+                            style: TextStyle(color: Colors.black),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         city == null ? '' : city!,
-                                        style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 14, fontWeight: FontWeight.normal),
+                                        style: Theme.of(context).textTheme.headline2,
                                       ),
-                                      _weatherDetailOb!.current!.weather![0].description == null
-                                          ? Container()
-                                          : Text(
-                                              '${_weatherDetailOb!.current!.weather![0].description}',
-                                              style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 10, fontWeight: FontWeight.normal),
-                                            ),
                                       const SizedBox(
-                                        height: 5,
+                                        height: 10,
                                       ),
                                       _weatherDetailOb!.current!.temp == 'null'
                                           ? Container()
@@ -114,16 +90,27 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                                             ),
                                     ],
                                   ),
-                          );
-                        },
-                      )),
-                  SliverToBoxAdapter(
-                    child: _weatherDetailOb!.hourly == null || _weatherDetailOb!.hourly!.length == 0
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    alignment: Alignment.bottomRight,
+                                    child: IconButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        icon: const Icon(
+                                          Icons.home,
+                                          color: Colors.white,
+                                        )),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                    _weatherDetailOb!.hourly == null || _weatherDetailOb!.hourly!.isEmpty
                         ? Container()
                         : Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 20),
                             child: Card(
-                              child: Container(
+                              child: SizedBox(
                                 height: 130,
                                 child: Padding(
                                     padding: const EdgeInsets.all(6.0),
@@ -146,7 +133,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                                                 _weatherDetailOb!.hourly![index].weather![0].icon == null
                                                     ? Container()
                                                     : CachedNetworkImage(
-                                                        imageUrl: ICON_URL + _weatherDetailOb!.hourly![index].weather![0].icon! + TYPE_ICON,
+                                                        imageUrl: iconUrl + _weatherDetailOb!.hourly![index].weather![0].icon! + typeIcon,
                                                         height: 50,
                                                         width: 50,
                                                         fadeInCurve: Curves.bounceIn,
@@ -165,9 +152,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                               ),
                             ),
                           ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: _weatherDetailOb!.daily == null || _weatherDetailOb!.daily!.length == 0
+                    _weatherDetailOb!.daily == null || _weatherDetailOb!.daily!.isEmpty
                         ? Container()
                         : Container(
                             margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -201,7 +186,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                                                 _weatherDetailOb!.daily![index].weather![0].icon == 'null'
                                                     ? Container()
                                                     : CachedNetworkImage(
-                                                        imageUrl: ICON_URL + _weatherDetailOb!.daily![index].weather![0].icon! + TYPE_ICON,
+                                                        imageUrl: iconUrl + _weatherDetailOb!.daily![index].weather![0].icon! + typeIcon,
                                                         height: 30,
                                                         width: 50,
                                                       )
@@ -242,9 +227,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                               ),
                             ),
                           ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Container(
+                    Container(
                       margin: const EdgeInsets.symmetric(horizontal: 8),
                       child: Card(
                         child: Padding(
@@ -259,7 +242,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                                     _weatherDetailOb!.current!.sunrise == 'null'
                                         ? Container()
                                         : todayInfo('Sunrise',
-                                            '${DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunrise ?? '') * 1000, isUtc: true))}'),
+                                            DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunrise ?? '') * 1000, isUtc: true))),
                                     _weatherDetailOb!.current!.clouds == 'null' ? Container() : todayInfo('Cloudiness', '${_weatherDetailOb!.current!.clouds} %'),
                                     _weatherDetailOb!.current!.windSpeed == 'null'
                                         ? Container()
@@ -278,7 +261,7 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                                     _weatherDetailOb!.current!.sunrise == 'null'
                                         ? Container()
                                         : todayInfo('Sunset',
-                                            '${DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunset ?? '') * 1000, isUtc: true))}'),
+                                            DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunset ?? '') * 1000, isUtc: true))),
                                     _weatherDetailOb!.current!.humidity == 'null' ? Container() : todayInfo('Humidity', '${_weatherDetailOb!.current!.humidity} %'),
                                     _weatherDetailOb!.current!.feelsLike == 'null' ? Container() : todayInfo('Feels Like', '${_weatherDetailOb!.current!.feelsLike} \u00B0'),
                                     _weatherDetailOb!.current!.pressure == 'null' ? Container() : todayInfo('Pressure', '${_weatherDetailOb!.current!.pressure} hPa'),
@@ -291,11 +274,8 @@ class _WeatherDetailPageState extends State<WeatherDetailPage> {
                         ),
                       ),
                     ),
-                  ),
-                  const SliverPadding(
-                    padding: EdgeInsets.all(10.0),
-                  )
-                ],
+                  ],
+                ),
               ),
             ),
     );

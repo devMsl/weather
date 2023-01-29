@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:weather/provider/sunrise_provider.dart';
 import 'package:weather/provider/temperature_provider.dart';
-import 'package:weather/provider/theme_provider.dart';
 import 'package:weather/view/pre_page.dart';
 
 void main() async {
@@ -28,11 +27,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: <SingleChildWidget>[
-        ChangeNotifierProvider(create: (_) => TemperatureProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => SunriseProvider())
-      ],
+      providers: <SingleChildWidget>[ChangeNotifierProvider(create: (_) => TemperatureProvider()), ChangeNotifierProvider(create: (_) => SunriseProvider())],
       child: PrePage(),
     );
   }

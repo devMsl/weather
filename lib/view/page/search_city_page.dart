@@ -6,12 +6,13 @@ import 'package:provider/provider.dart';
 import 'package:weather/bloc/city_weather_bloc.dart';
 import 'package:weather/bloc/weather_detail_bloc.dart';
 import 'package:weather/model/city_weather_ob.dart';
-import 'package:weather/model/respone_ob.dart';
+import 'package:weather/model/response_ob.dart';
 import 'package:weather/model/weather_detail_ob.dart';
-import 'package:weather/provider/sunrise_provider.dart';
 import 'package:weather/provider/temperature_provider.dart';
 import 'package:weather/utils/app_constants.dart';
 import 'package:weather/view/widgets/loading_widget.dart';
+
+import '../../provider/sunrise_provider.dart';
 
 class SearchByCityPage extends StatefulWidget {
   @override
@@ -19,43 +20,41 @@ class SearchByCityPage extends StatefulWidget {
 }
 
 class _SearchByCityPageState extends State<SearchByCityPage> {
-  String? searchCity;
   TextEditingController searchCityController = TextEditingController();
+
   late SearchCityWeatherBloc _bloc;
+  late WeatherDetailBloc _weatherDetailBloc;
+
   SearchCityWeatherOb? _searchCityOb;
+  WeatherDetailOb? _weatherDetailOb;
+
   bool isLoading = false;
+
   String? lat;
   String? lon;
-  late WeatherDetailBloc _weatherDetailBloc;
-  WeatherDetailOb? _weatherDetailOb;
+  String? city;
+  String? searchCity;
+
   List<String>? timeZone;
   List<String>? timeZoneCopy;
-  String? message;
-  var top = 0.0;
-  String? city;
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   goSearch(String str) {
-    _bloc = SearchCityWeatherBloc('weather?q=$str&appid=$APP_ID');
+    _bloc = SearchCityWeatherBloc('weather?q=$str&appid=$appId');
     setState(() {
       isLoading = true;
     });
     _bloc.getCityWeatherData();
     _bloc.getCityWeatherStream().listen((event) {
       if (event.responseState == ResponseState.noData) {
-        setState(() {
-          message = event.data['message'];
-        });
+        setState(() {});
+        isLoading = false;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No City Found!')));
       }
       if (event.responseState == ResponseState.data) {
         _searchCityOb = event.data;
         lat = _searchCityOb!.coord!.lat;
         lon = _searchCityOb!.coord!.lon;
-        _weatherDetailBloc = WeatherDetailBloc('onecall?lat=${lat ?? ''}&lon=${lon ?? ''}&exclude=minutely&units=${context.read<TemperatureProvider>().unit}&appid=$APP_ID');
+        _weatherDetailBloc = WeatherDetailBloc('onecall?lat=${lat ?? ''}&lon=${lon ?? ''}&exclude=minutely&units=${context.read<TemperatureProvider>().unit}&appid=$appId');
         _weatherDetailBloc.getWeatherDetailData();
         _weatherDetailBloc.getWeatherStream().listen((event) {
           if (event.responseState == ResponseState.data) {
@@ -71,6 +70,11 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
           }
         });
       }
+      if (event.responseState == ResponseState.error) {
+        setState(() {});
+        isLoading = false;
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unavailable!')));
+      }
     });
   }
 
@@ -79,9 +83,10 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-            image: DecorationImage(image: context.read<SunriseProvider>().isSunrise ? AssetImage('assets/sunrise.jpeg') : AssetImage('assets/sunset.jpeg'), fit: BoxFit.fill)),
+            image: DecorationImage(
+                image: context.read<SunriseProvider>().isSunrise ? const AssetImage('assets/sunrise.JPG') : const AssetImage('assets/sunset.JPG'), fit: BoxFit.fill)),
         child: CustomScrollView(
-          physics: BouncingScrollPhysics(),
+          // physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
                 backgroundColor: Colors.transparent,
@@ -95,11 +100,9 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                   },
                 ),
                 automaticallyImplyLeading: false,
-                expandedHeight: 210.0,
+                expandedHeight: 170.0,
                 floating: true,
                 elevation: 0,
-                pinned: false,
-                snap: false,
                 title: Container(
                   decoration: BoxDecoration(color: Colors.grey.withOpacity(.2), borderRadius: BorderRadius.circular(20)),
                   child: TextFormField(
@@ -111,7 +114,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                             searchCityController.text.isNotEmpty ? goSearch(searchCityController.text) : null;
                             setState(() {});
                           },
-                          icon: Icon(CupertinoIcons.search)),
+                          icon: const Icon(CupertinoIcons.search)),
                       filled: true,
                       fillColor: Colors.transparent,
                       border: OutlineInputBorder(
@@ -124,10 +127,10 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
                   background: Container(
                     color: _weatherDetailOb == null ? Colors.transparent : Colors.black54,
                   ),
-                  stretchModes: [StretchMode.zoomBackground],
                   title: _weatherDetailOb == null
                       ? Container()
                       : Column(
@@ -137,12 +140,6 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                               city == null ? '' : city!,
                               style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 14, fontWeight: FontWeight.normal),
                             ),
-                            _weatherDetailOb!.current!.weather![0].description == null
-                                ? Container()
-                                : Text(
-                                    '${_weatherDetailOb!.current!.weather![0].description}',
-                                    style: Theme.of(context).textTheme.bodyText1!.copyWith(fontSize: 10, fontWeight: FontWeight.normal),
-                                  ),
                             const SizedBox(
                               height: 5,
                             ),
@@ -167,12 +164,12 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                     padding: EdgeInsets.all(10.0),
                   )
                 : SliverToBoxAdapter(
-                    child: _weatherDetailOb!.hourly == null || _weatherDetailOb!.hourly!.length == 0
+                    child: _weatherDetailOb!.hourly == null || _weatherDetailOb!.hourly!.isEmpty
                         ? Container()
                         : Container(
                             margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             child: Card(
-                              child: Container(
+                              child: SizedBox(
                                 height: 130,
                                 child: Padding(
                                     padding: const EdgeInsets.all(6.0),
@@ -195,11 +192,11 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                                                 _weatherDetailOb!.hourly![index].weather![0].icon == null
                                                     ? Container()
                                                     : CachedNetworkImage(
-                                                        imageUrl: ICON_URL + _weatherDetailOb!.hourly![index].weather![0].icon! + TYPE_ICON,
+                                                        imageUrl: iconUrl + _weatherDetailOb!.hourly![index].weather![0].icon! + typeIcon,
                                                         height: 50,
                                                         width: 50,
                                                         fadeInCurve: Curves.bounceIn,
-                                                        fadeInDuration: Duration(seconds: 3),
+                                                        fadeInDuration: const Duration(seconds: 3),
                                                       ),
                                                 _weatherDetailOb!.hourly![index].temp == 'null'
                                                     ? Container()
@@ -220,7 +217,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                     padding: EdgeInsets.all(10.0),
                   )
                 : SliverToBoxAdapter(
-                    child: _weatherDetailOb!.daily == null || _weatherDetailOb!.daily!.length == 0
+                    child: _weatherDetailOb!.daily == null || _weatherDetailOb!.daily!.isEmpty
                         ? Container()
                         : Container(
                             margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -254,7 +251,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                                                 _weatherDetailOb!.daily![index].weather![0].icon == 'null'
                                                     ? Container()
                                                     : CachedNetworkImage(
-                                                        imageUrl: ICON_URL + _weatherDetailOb!.daily![index].weather![0].icon! + TYPE_ICON,
+                                                        imageUrl: iconUrl + _weatherDetailOb!.daily![index].weather![0].icon! + typeIcon,
                                                         height: 30,
                                                         width: 50,
                                                       )
@@ -316,7 +313,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                                     _weatherDetailOb!.current!.sunrise == 'null'
                                         ? Container()
                                         : todayInfo('Sunrise',
-                                            '${DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunrise ?? '') * 1000, isUtc: true))}'),
+                                            DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunrise ?? '') * 1000, isUtc: true))),
                                     _weatherDetailOb!.current!.clouds == 'null' ? Container() : todayInfo('Cloudiness', '${_weatherDetailOb!.current!.clouds} %'),
                                     _weatherDetailOb!.current!.windSpeed == 'null'
                                         ? Container()
@@ -335,7 +332,7 @@ class _SearchByCityPageState extends State<SearchByCityPage> {
                                     _weatherDetailOb!.current!.sunrise == 'null'
                                         ? Container()
                                         : todayInfo('Sunset',
-                                            '${DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunset ?? '') * 1000, isUtc: true))}'),
+                                            DateFormat('jm').format(DateTime.fromMillisecondsSinceEpoch(int.parse(_weatherDetailOb!.current!.sunset ?? '') * 1000, isUtc: true))),
                                     _weatherDetailOb!.current!.humidity == 'null' ? Container() : todayInfo('Humidity', '${_weatherDetailOb!.current!.humidity} %'),
                                     _weatherDetailOb!.current!.feelsLike == 'null' ? Container() : todayInfo('Feels Like', '${_weatherDetailOb!.current!.feelsLike} \u00B0'),
                                     _weatherDetailOb!.current!.pressure == 'null' ? Container() : todayInfo('Pressure', '${_weatherDetailOb!.current!.pressure} hPa'),

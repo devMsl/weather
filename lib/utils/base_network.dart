@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:http/http.dart' show Client;
-import 'package:weather/model/respone_ob.dart';
+import 'package:weather/model/response_ob.dart';
 import 'package:weather/utils/app_constants.dart';
 
 class BaseNetwork {
   Client client = Client();
   Future<ResponseOb> getRequest({required String url}) async {
     ResponseOb rv = ResponseOb();
-    return await client.get(Uri.parse(BASE_URL + url)).then((res) {
+    return await client.get(Uri.parse(baseUrl + url)).then((res) {
       if (res.statusCode == 200) {
         rv.responseState = ResponseState.data;
         rv.data = res.body;

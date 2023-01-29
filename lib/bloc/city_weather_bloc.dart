@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:rxdart/rxdart.dart';
 import 'package:weather/model/city_weather_ob.dart';
-import 'package:weather/model/respone_ob.dart';
+import 'package:weather/model/response_ob.dart';
 import 'package:weather/utils/base_network.dart';
 
 class SearchCityWeatherBloc extends BaseNetwork {
